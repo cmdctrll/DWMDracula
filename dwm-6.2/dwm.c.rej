@@ -1,23 +1,38 @@
 --- dwm.c
 +++ dwm.c
-@@ -725,17 +725,17 @@ drawbar(Monitor *m)
- 		x += w;
+@@ -431,18 +431,23 @@ buttonpress(XEvent *e)
  	}
- 	w = blw = TEXTW(m->ltsymbol);
--	drw_setscheme(drw, scheme[SchemeNorm]);
-+	drw_setscheme(drw, scheme[SchemeTagsNorm]);
- 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
- 
- 	if ((w = m->ww - sw - x) > bh) {
- 		if (m->sel) {
--			drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
-+			drw_setscheme(drw, scheme[m == selmon ? SchemeInfoSel : SchemeInfoNorm]);
- 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
- 			if (m->sel->isfloating)
- 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
- 		} else {
--			drw_setscheme(drw, scheme[SchemeNorm]);
-+			drw_setscheme(drw, scheme[SchemeInfoNorm]);
- 			drw_rect(drw, x, 0, w, bh, 1, 1);
- 		}
- 	}
+ 	if (ev->window == selmon->barwin) {
+ 		i = x = 0;
+-		do
+-			x += TEXTW(tags[i]);
+-		while (ev->x >= x && ++i < LENGTH(tags));
+-		if (i < LENGTH(tags)) {
+-			click = ClkTagBar;
+-			arg.ui = 1 << i;
+-		} else if (ev->x < x + blw)
+-			click = ClkLtSymbol;
+-		else if (ev->x > selmon->ww - TEXTW(stext))
+-			click = ClkStatusText;
+-		else
+-			click = ClkWinTitle;
++		x += TEXTW(buttonbar);
++		if(ev->x < x) {
++			click = ClkButton;
++		} else {
++			do
++				x += TEXTW(tags[i]);
++			while (ev->x >= x && ++i < LENGTH(tags));
++			if (i < LENGTH(tags)) {
++				click = ClkTagBar;
++				arg.ui = 1 << i;
++			} else if (ev->x < x + blw)
++				click = ClkLtSymbol;
++			else if (ev->x > selmon->ww - TEXTW(stext))
++				click = ClkStatusText;
++			else
++				click = ClkWinTitle;
++		}
+ 	} else if ((c = wintoclient(ev->window))) {
+ 		focus(c);
+ 		restack(selmon);
